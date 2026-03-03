@@ -1,0 +1,44 @@
+name: Build Smartlandia RustDesk Windows
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Install dependencies
+        run: |
+          choco install llvm -y
+          choco install cmake -y
+
+      - name: Embed Smartlandia configuration
+        run: |
+          echo RENDEZVOUS_SERVER=193.123.122.219>>.env
+          echo RELAY_SERVER=193.123.122.219>>.env
+          echo API_SERVER=193.123.122.219>>.env
+          echo KEY=YlSgkBEu77DBkXDuHrzZeQDw26ooqflHDxIas3iRZDc=>>.env
+
+      - name: Build Windows Client
+        run: |
+          cargo build --release
+
+      - name: Rename binary
+        run: |
+          ren target\release\rustdesk.exe Smartlandia-Suporte.exe
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Smartlandia-Suporte-Windows
+          path: target/release/Smartlandia-Suporte.exe
